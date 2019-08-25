@@ -46,9 +46,10 @@ class HelloFreshRecipes:
     def __init__(self):
         self.RECIPE_DIR = get_or_make_dir(os.path.abspath('.'), 'recipes')
         self.TEMP_DIR = get_or_make_dir(os.path.abspath('.'), 'tmp')
-        self.ACCESS_TOKEN = self.login()
+        self.ACCESS_TOKEN = None  # obtain later
 
     def login(self):
+        print('Logging in...')
         login_payload = {
             'username': USERNAME,
             'password': PASSWORD
@@ -58,7 +59,9 @@ class HelloFreshRecipes:
             raise Exception(resp)
         return resp.json()['access_token']
 
-    def save_items(self):
+    def collect_recipes(self):
+
+        self.ACCESS_TOKEN = self.login()
 
         print('Collecting recipes...')
         all_recipes = []
@@ -153,6 +156,10 @@ class HelloFreshRecipes:
         if not recipe.steps or not recipe.ingredients:
             return
 
+        if ' with' in recipe.name:
+            recipe.name, remainder = recipe.name.split(' with')
+            recipe.headline = 'With' + remainder
+
         dest_dir = self.RECIPE_DIR if recipe.author is None else get_or_make_dir(self.RECIPE_DIR, recipe.author)
         path = os.path.join(dest_dir, self.prepare_str(f'{recipe.name}.pdf', True))
         if os.path.exists(path):
@@ -167,9 +174,9 @@ class HelloFreshRecipes:
         pdf.add_page()
 
         # Title, description, other attributes
-        pdf = self.write(pdf, 18, 10, 15, self.prepare_str(recipe.name))
-        pdf = self.write(pdf, 10, 10, 21, self.prepare_str(recipe.headline))
-        pdf = self.write(pdf, 10, 10, 26, f'For 2 people, {recipe.nutrition[1]["amount"]} cal per serving')
+        pdf = self.write(pdf, 14, 10, 15, self.prepare_str(recipe.name))
+        pdf = self.write(pdf, 10, 10, 20, self.prepare_str(recipe.headline))
+        pdf = self.write(pdf, 10, 10, 25, f'For 2 people, {recipe.nutrition[1]["amount"]} cal per serving')
         pdf = self.multi_cell(pdf, 7, 10, 30, 110, 4, self.prepare_str(recipe['description']))
 
         # Main illustrative image
