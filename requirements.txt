@@ -1,0 +1,6 @@
+certifi==2019.6.16
+chardet==3.0.4
+fpdf==1.7.2
+idna==2.8
+requests==2.22.0
+urllib3==1.25.3
