@@ -7,3 +7,5 @@
 - Run hfrecipes.py
 
 Enjoy your recipes!
+
+A couple of examples can be found in this repository.
